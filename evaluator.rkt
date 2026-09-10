@@ -5,20 +5,17 @@
 
     [`(lit ,val) 
       (printf "'(lit ~a)\n" val)
-      (displayln "")
     ]
 
     [`(var ,id) 
       (if (hash-empty? env)
         (begin (printf "'(var ~a)\n" id))
-        (begin (printf "'(var ~a) has a value of ~a\n" id (hash-ref env id)))
+        (begin (printf "'(var ~a) with a value of ~a\n" id (hash-ref env id)))
       )
-      (displayln "")
     ]
 
     [`(not ,subex) 
       (displayln subex)
-      (displayln "")
 
     ]
 
@@ -28,10 +25,19 @@
     ]
     [else (error "Invalid AST node structure")]))
 
+(displayln "\nLiteral")
+(eval-expr '(lit 157) #hash())
 
-;(eval-expr '(var "x") #hash())
-;(eval-expr '(var "x") #hash(("x" . 27)))
-;(eval-expr '(not (var x)) #hash())
+(displayln "\nVariable, no hash")
+(eval-expr '(var "x") #hash())
+
+(displayln "\nVariable, with hash")
+(eval-expr '(var "x") #hash(("x" . 27)))
+
+(displayln "\nDisplay Subexpression")
+(eval-expr '(not (var x)) #hash())
+
+(displayln "\nBinary Operation")
 (eval-expr '(binary-op "+" (lit 2) (binary-op "*" (var "x") (lit 4))) #hash(("x" . 3)))
 
 
