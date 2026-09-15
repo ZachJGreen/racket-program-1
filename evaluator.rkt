@@ -32,41 +32,26 @@
   ; if left evaluates to maybe or right evaluates to maybe
   (if (or (equal? (eval-expr left env) 'maybe) (equal? (eval-expr right env) 'maybe))
     ; True Case:
-    (begin 
-      'maybe
-    )
+    (begin 'maybe )
 
     ; False Case
     (begin 
       (match op
         ["+"
-          ( +
-            (eval-expr left env)
-            (eval-expr right env)
-          )
+          ( + (eval-expr left env) (eval-expr right env))
         ]
+
         ["-"
-          ( -
-            (eval-expr left env)
-            (eval-expr right env)
-          )
+          ( - (eval-expr left env) (eval-expr right env))
         ]
+
         ["*"
-          ( *
-            (eval-expr left env)
-            (eval-expr right env)
-          )
+          ( * (eval-expr left env) (eval-expr right env))
         ]
+
         ["/"
-          ( /
-            (eval-expr left env)
-            (eval-expr right env)
-          )
-        ]
-      )
-    )
-  )
-)
+          ( / (eval-expr left env) (eval-expr right env))
+        ] ))))
 
 
 ;(displayln "\nLiteral Test")
