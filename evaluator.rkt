@@ -1,5 +1,5 @@
 #lang racket
-
+(provide eval-expr)
 (define (eval-expr expr env)
   (match expr
 
@@ -18,12 +18,13 @@
     [`(binary-op ,op ,left ,right)
       (eval-expr left env)
       (eval-expr right env)
-      (equate op left right env)
+      (if (member op '("+", "-", "*", "/")) (equate op left right env) (compare op left right env))
+
     ]
     [else (error "Invalid AST node structure")]))
 
 (define (equate op left right env)
-
+  
   ; if left evaluates to maybe or right evaluates to maybe
   (if (or (equal? (eval-expr left env) 'maybe) (equal? (eval-expr right env) 'maybe))
     ; True Case:
@@ -46,9 +47,36 @@
 
         ["/"
           ( / (eval-expr left env) (eval-expr right env))
-        ] ))))
+        ] 
+        ))))
 
+(define (compare op left right env)
+  (if (or (equal? (eval-expr left env) 'maybe) (equal? (eval-expr right env) 'maybe))
+    ; True Case:
+    (begin 'maybe )
+    (begin (match op
+      [">"
+        (if ( > (eval-expr left env) (eval-expr right env)) 'yes 'no)
+      ]
 
+      ["<"
+        (if ( > (eval-expr left env) (eval-expr right env)) 'yes 'no)
+      ]
+
+      [">="
+        (if ( > (eval-expr left env) (eval-expr right env)) 'yes 'no)
+      ]
+
+      ["<="
+        (if ( > (eval-expr left env) (eval-expr right env)) 'yes 'no)
+      ]
+
+      ["=="
+        (if ( > (eval-expr left env) (eval-expr right env)) 'yes 'no)
+      ]
+    ))
+  )
+)
 ;(displayln "\nLiteral Test")
 ;(eval-expr '(lit 157) #hash())
 
@@ -62,7 +90,9 @@
 ;(eval-expr '(not (var x)) #hash(("x" . "hello")))
 
 ;(displayln "\nBinary Operation Test")
-(eval-expr '(binary-op "+" (lit 2) (binary-op "*" (var "x") (lit 4))) #hash(("x" . 3)))
+;(eval-expr '(binary-op "+" (lit 2) (binary-op "*" (var "x") (lit 4))) #hash(("x" . 3)))
 
 ;(displayln "\nBasic Operation Test\n")
 ;(eval-expr '(binary-op "*" (var "y") (lit 4)) #hash(("x" . 5)))
+
+;(eval-expr '(binary-op ">" (var "x") (lit 3)) #hash())

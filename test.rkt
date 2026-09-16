@@ -1,5 +1,5 @@
 #lang racket
-
+(require "evaluator.rkt")
 ;;Test identities
 ;; Expected return '(var x), then check hash, return '(lit 42)
 (eval-expr '(binary-op "+" (var "x") (lit 0)) #hash(("x" . 42)))
@@ -74,14 +74,14 @@
 
 ;; Expected: (20/(8-4)) + 5 = 10)
 
-(binary-op "+" (binary-op "/" (lit 20) (binary-op "-" (lit 8) (lit 4))) (lit 5))
+;         (binary-op "+" (binary-op "/" (lit 20) (binary-op "-" (lit 8) (lit 4))) (lit 5) #hash())
 
 ;; Expected: 'maybe due to unbound variable X
-(binary-op "+" (var "X") (var "Y") (hash ("Y" . 10)))
+;(binary-op "+" (var "X") (var "Y") (hash ("Y" . 10)))
 
 ;; Expected: '(lit "this and that")
-(binary-op "~" (lit "this ") (binary-op "~" (lit "and ") (lit "that")))
+;         (binary-op "~" (lit "this ") (binary-op "~" (lit "and ") (lit "that")))
 
 ;; Expected '(lit maybe) because of incompatible types
-(binary-op "~" (lit "number ") (lit 5)))
-(binary-op "+" (lit "number ") (lit 5)))
+;(binary-op "~" (lit "number ") (lit 5))
+;(binary-op "+" (lit "number ") (lit 5))
