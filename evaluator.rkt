@@ -11,16 +11,42 @@
       (eval-expr (list 'lit (hash-ref env id 'maybe)) env)
     ]
 
-    [`(not ,subex) 
-      (eval-expr subex env)
+    [`(not ,subex)
+      (cond
+        [ (equal? (eval-expr subex env) 'yes)
+          'no
+        ]
+
+        [ (equal? (eval-expr subex env) 'no)
+          'yes
+        ]
+
+        [ (equal? (eval-expr subex env) 'maybe)
+          'maybe
+        ]
+      )
+      
     ]
 
     [`(binary-op ,op ,left ,right)
       (eval-expr left env)
       (eval-expr right env)
-      (if (member op '("+", "-", "*", "/")) (equate op left right env) (compare op left right env))
 
+      (cond 
+        [ (member op '("+" "-" "*" "/"))
+
+          (if (or (member (eval-expr left env) '(yes no maybe)) (member (eval-expr right env) '(yes no maybe)))
+            'maybe
+            (equate op left right env)
+          )
+        ]
+
+        [ (member op '(">" "<" ">=" "<=" "~" "and" "or"))
+          (compare op left right env)
+        ]
+      )
     ]
+
     [else (error "Invalid AST node structure")]))
 
 (define (equate op left right env)
@@ -46,7 +72,10 @@
         ]
 
         ["/"
-          ( / (eval-expr left env) (eval-expr right env))
+          (if ( = (eval-expr right env) 0)
+            'maybe
+            ( / (eval-expr left env) (eval-expr right env))
+          )
         ] 
         ))))
 
@@ -60,39 +89,46 @@
       ]
 
       ["<"
-        (if ( > (eval-expr left env) (eval-expr right env)) 'yes 'no)
+        (if ( < (eval-expr left env) (eval-expr right env)) 'yes 'no)
       ]
 
       [">="
-        (if ( > (eval-expr left env) (eval-expr right env)) 'yes 'no)
+        (if ( >= (eval-expr left env) (eval-expr right env)) 'yes 'no)
       ]
 
       ["<="
-        (if ( > (eval-expr left env) (eval-expr right env)) 'yes 'no)
+        (if ( <= (eval-expr left env) (eval-expr right env)) 'yes 'no)
       ]
 
-      ["=="
-        (if ( > (eval-expr left env) (eval-expr right env)) 'yes 'no)
+      ["~"
+        (if ( eq? (eval-expr left env) (eval-expr right env)) 'yes 'no)
+      ]
+
+      ["and"
+        (if (and (member (eval-expr left env) '(yes no maybe)) (member (eval-expr right env) '(yes no maybe)))
+          (cond
+            [(or (equal? (eval-expr left env) 'no) (equal? (eval-expr right env) 'no))
+              'no
+            ]
+
+            [(or (equal? (eval-expr left env) 'maybe) (equal? (eval-expr right env) 'maybe))
+              'maybe
+            ]
+
+            
+          )
+        )
+      ]
+
+      ["or"
+
       ]
     ))
   )
 )
-;(displayln "\nLiteral Test")
-;(eval-expr '(lit 157) #hash())
 
-;(displayln "\nVariable, no hash Test")
-;(eval-expr '(var "x") #hash())
 
-;(displayln "\nVariable, with hash Test")
-;(eval-expr '(var "x") #hash(("x" . 27)))
-
-;(displayln "\nDisplay Subexpression Test")
-;(eval-expr '(not (var x)) #hash(("x" . "hello")))
-
-;(displayln "\nBinary Operation Test")
-;(eval-expr '(binary-op "+" (lit 2) (binary-op "*" (var "x") (lit 4))) #hash(("x" . 3)))
-
-;(displayln "\nBasic Operation Test\n")
-;(eval-expr '(binary-op "*" (var "y") (lit 4)) #hash(("x" . 5)))
-
-;(eval-expr '(binary-op ">" (var "x") (lit 3)) #hash())
+(eval-expr '(not (lit no)) #hash())
+;(eval-expr '(lit yes) #hash())
+;(equal? (eval-expr '(lit yes) #hash()) 'yes)
+;(member (eval-expr '(lit yes) #hash()) '(yes no maybe))
