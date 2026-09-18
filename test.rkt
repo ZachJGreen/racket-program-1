@@ -98,20 +98,21 @@
 (eval-expr '(binary-op "or" (binary-op ">" (var "y") (lit 10)) (lit yes)) #hash())
 
 ;; Expected: (20/(8-4)) + 5 = 10)
-;(displayln "\nTest 24")
-;(binary-op "+" (binary-op "/" (lit 20) (binary-op "-" (lit 8) (lit 4))) (lit 5) #hash())
+(displayln "\nTest 24")
+(eval-expr '(binary-op "+" (binary-op "/" (lit 20) (binary-op "-" (lit 8) (lit 4))) (lit 5) ) #hash())
 
 ;; Expected: 'maybe due to unbound variable X
-;(displayln "\nTest 25")
-;(binary-op "+" (var "X") (var "Y") (hash ("Y" . 10)))
+(displayln "\nTest 25")
+(eval-expr '(binary-op "+" (var "X") (var "Y") ) #hash(("Y" . 10)))
 
 ;; Expected: '(lit "this and that")
-;(displayln "\nTest 26")
-;         (binary-op "~" (lit "this ") (binary-op "~" (lit "and ") (lit "that")))
+(displayln "\nTest 26")
+(eval-expr '(binary-op "~" (lit "this ") (binary-op "~" (lit "and ") (lit "that"))) #hash())
 
 ;; Expected '(lit maybe) because of incompatible types
-;(displayln "\nTest 27")
-;(binary-op "~" (lit "number ") (lit 5))
+(displayln "\nTest 27")
+(eval-expr '(binary-op "~" (lit "number ") (lit 5)) #hash())
 
-;(displayln "\nTest 28")
-;(binary-op "+" (lit "number ") (lit 5))
+;; Expected 'maybe
+(displayln "\nTest 28")
+(eval-expr '(binary-op "+" (lit "number ") (lit 5)) #hash())

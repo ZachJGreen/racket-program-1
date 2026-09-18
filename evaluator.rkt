@@ -33,7 +33,7 @@
       (eval-expr right env)
 
       (cond 
-        [ (member op '("+" "-" "*" "/"))
+        [ (and (member op '("+" "-" "*" "/")) (and (number? (eval-expr left env)) (number? (eval-expr right env))))
 
           (if (or (member (eval-expr left env) '(yes no maybe)) (member (eval-expr right env) '(yes no maybe)))
             'maybe
@@ -41,9 +41,20 @@
           )
         ]
 
-        [ (member op '(">" "<" ">=" "<=" "~" "and" "or"))
+        [ (member op '(">" "<" ">=" "<=" "==" "and" "or"))
           (compare op left right env)
         ]
+
+        [ (eq? op "~")
+          (if (and (string? (eval-expr left env)) (string? (eval-expr right env)))
+            (string-append (eval-expr left env) (eval-expr right env))
+            'maybe
+          )
+          
+           
+        ]
+
+        [else 'maybe]
       )
     ]
 
@@ -80,7 +91,7 @@
         ))))
 
 (define (compare op left right env)
-  (if (or (equal? (eval-expr left env) 'maybe) (equal? (eval-expr right env) 'maybe))
+  (if (and (or (equal? (eval-expr left env) 'maybe) (equal? (eval-expr right env) 'maybe)) (not (member op '("and" "or"))))
     ; True Case:
     (begin 'maybe )
     (begin (match op
@@ -100,35 +111,57 @@
         (if ( <= (eval-expr left env) (eval-expr right env)) 'yes 'no)
       ]
 
-      ["~"
+      ["=="
         (if ( eq? (eval-expr left env) (eval-expr right env)) 'yes 'no)
       ]
 
       ["and"
         (if (and (member (eval-expr left env) '(yes no maybe)) (member (eval-expr right env) '(yes no maybe)))
           (cond
+            ; Either is no -> then no
             [(or (equal? (eval-expr left env) 'no) (equal? (eval-expr right env) 'no))
               'no
             ]
 
+            ; either is maybe -> maybe
             [(or (equal? (eval-expr left env) 'maybe) (equal? (eval-expr right env) 'maybe))
               'maybe
             ]
 
-            
+            ; last possible case is Yes and Yes -> Yes
+            [else 'yes]
+
           )
+          'maybe
         )
       ]
 
       ["or"
+        (if (and (member (eval-expr left env) '(yes no maybe)) (member (eval-expr right env) '(yes no maybe)))
+        (cond
 
+            ; either is yes -> yes
+            [(or (equal? (eval-expr left env) 'yes) (equal? (eval-expr right env) 'yes))
+              'yes
+            ]
+            
+            ; both are no -> no
+            [(and (equal? (eval-expr left env) 'no) (equal? (eval-expr right env) 'no))
+              'no
+            ]
+
+            ; otherwise maybe
+            [else 'maybe]
+
+          
+          )
+          'maybe
+        )
       ]
     ))
   )
 )
 
 
-(eval-expr '(not (lit no)) #hash())
-;(eval-expr '(lit yes) #hash())
-;(equal? (eval-expr '(lit yes) #hash()) 'yes)
-;(member (eval-expr '(lit yes) #hash()) '(yes no maybe))
+
+
