@@ -27,9 +27,7 @@
         ]
 
         ;; Otherwise maybe
-        [ (equal? (eval-expr subex env) 'maybe)
-          'maybe
-        ]
+        [ else 'maybe ]
       )
       
     ]
@@ -200,4 +198,3 @@
     ))
   )
 )
-
